@@ -12,7 +12,7 @@ class Email extends Model
     /**
      * {@inheritDoc}
      */
-    protected $fillable = ['user_id', 'from', 'to', 'subject', 'body', 'is_sent'];
+    protected $fillable = ['from', 'to', 'subject', 'body', 'is_sent'];
 
 
     /**

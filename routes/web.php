@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\MailController;
+use App\Http\Controllers\mails\CategoryController;
+use App\Http\Controllers\mails\MailController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/inbox', [MailController::class, 'inbox'])->name('inbox');

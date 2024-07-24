@@ -2,6 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Category;
+use App\Models\Email;
+use App\Models\Keyword;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -13,11 +16,17 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        $keywords = Keyword::factory()->count(10)->create();
+
+        $categories = Category::factory()
+                               ->count(10)
+                               ->hasAttached($keywords)
+                               ->create();
+
+        $emails = Email::factory()
+                        ->count(10)
+                        ->hasAttached($categories)
+                        ->create();
     }
 }

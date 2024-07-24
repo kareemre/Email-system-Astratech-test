@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\mails;
 
+use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Keyword;
 use Illuminate\Http\Request;
