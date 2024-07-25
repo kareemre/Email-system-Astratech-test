@@ -86,17 +86,4 @@ To handle email sending via a queue, follow these steps:
 - Use query builder instead of ORM to optimize database performance.
 - Apply queue jobs when sending emails.
 
-## Testing
-
-1. **Create a test database and update the `.env` file:**
-
-    ```dotenv
-    DB_DATABASE=your_test_database
-    ```
-
-2. **Run the tests:**
-
-    ```bash
-    php artisan test
-    ```
 
