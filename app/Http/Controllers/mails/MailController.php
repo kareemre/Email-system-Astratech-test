@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\mails;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CategorizeEmailRequest;
 use App\Http\Requests\MailValidationRequest;
 use App\Jobs\SendEmailJob;
 use App\Models\Attachment;
+use App\Models\Category;
 use App\Models\Email;
 use App\services\MailService;
 use Illuminate\Http\Request;
@@ -22,6 +24,7 @@ class MailController extends Controller
      */
     private $mailService;
 
+
     public function __construct(MailService $mailService)
     {
         $this->mailService = $mailService;
@@ -30,7 +33,10 @@ class MailController extends Controller
     public function inbox()
     {
         $emails = Email::where('is_sent', false)->get();
-        return view('emails.inbox', compact('emails'));
+
+        $categories = Category::all();
+
+        return view('emails.inbox', compact('emails', 'categories'));
     }
 
     public function outbox()
@@ -55,9 +61,15 @@ class MailController extends Controller
         return view('emails.forward_email', compact('email'));
     }
 
+    public function showEmail(Email $email)
+    {
+        return view('emails.show', compact('email'));
+    }
+
 
     /**
-     * sending and storing emails 
+     * calling the MailService to send email, then storing emails 
+     * and it's related attachments
      * 
      * @param MailValidationRequest $request
      * 
@@ -68,6 +80,7 @@ class MailController extends Controller
         $data = $request->validated();
 
         $this->mailService->sendEmail($data);
+
         $email = Email::create([
             'from' => config('mail.from.address'),
             'to' => $data['to'],
@@ -81,7 +94,7 @@ class MailController extends Controller
                 Attachment::create([
                     'email_id'  => $email->id,
                     'file_name' => $attachment->getClientOriginalName(),
-                    'file_path' => $attachment->store('attachments'),
+                    'file_path' => $attachment->store('public/attachments'),
                 ]);
             }
         }
@@ -90,49 +103,31 @@ class MailController extends Controller
     }
 
 
-
+    /**
+     * calling the MailService to reply email, then storing emails 
+     * and it's related attachments
+     * 
+     * @param MailValidationRequest $request
+     * 
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function replyEmail(Request $request, Email $email)
     {
         $data = $request->all();
-        $replyBody = "Replying to:\n\n" . $email->body . "\n\n" . $data['body'];
 
-        Mail::raw($replyBody, function ($message) use ($data, $email) {
-            $message->from(config('mail.from.address'), config('mail.from.name'));
-            $message->to($email->from);
-            $message->subject('Re: ' . $email->subject);
-
-            if (isset($data['attachments'])) {
-                foreach ($data['attachments'] as $attachment) {
-                    $message->attach($attachment->getRealPath(), [
-                        'as' => $attachment->getClientOriginalName(),
-                        'mime' => $attachment->getMimeType(),
-                    ]);
-                }
-            }
-        });
-
-        $replyEmail = Email::create([
-            'user_id' => 2,
-            'from' => config('mail.from.address'),
-            'to' => $email->from,
-            'subject' => 'Re: ' . $email->subject,
-            'body' => $replyBody,
-            'is_sent' => true, // Sent emails
-        ]);
-
-        if (isset($data['attachments'])) {
-            foreach ($data['attachments'] as $attachment) {
-                Attachment::create([
-                    'email_id' => $replyEmail->id,
-                    'filename' => $attachment->getClientOriginalName(),
-                    'path' => $attachment->store('attachments'),
-                ]);
-            }
-        }
+        $this->mailService->replyEmail($data, $email);
 
         return back()->with('success', 'Reply sent successfully');
     }
 
+    /**
+     * forwarding and email and storing it with its attachments
+     * 
+     * @param Request $request
+     * @param Email $email
+     * 
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function forwardEmail(Request $request, Email $email)
     {
         $data = $request->all();
@@ -173,5 +168,19 @@ class MailController extends Controller
         }
 
         return back()->with('success', 'Email forwarded successfully');
+    }
+
+
+    /**
+     * syncing emails with categories
+     * @param Request $request
+     * @param Email $email
+     * 
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function categorizeEmail(CategorizeEmailRequest $request, Email $email)
+    {
+        $email->categories()->sync($request->categories);
+        return back()->with('success', 'Email categorized successfully');
     }
 }

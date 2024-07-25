@@ -8,7 +8,9 @@
             <tr>
                 <th>To</th>
                 <th>Subject</th>
-                <th>Sent At</th>
+                <th>Body</th>
+                <th>Attachments</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -16,7 +18,17 @@
                 <tr>
                     <td>{{ $email->to }}</td>
                     <td>{{ $email->subject }}</td>
-                    <td>{{ $email->created_at }}</td>
+                    <td>{{ Str::limit($email->body, 50) }}</td>
+                    <td>
+                        @foreach($email->attachments as $attachment)
+                            <a href="{{ Storage::url($attachment->file_path) }}" target="_blank">{{ $attachment->file_name }}</a><br>
+                        @endforeach
+                    </td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <a href="{{ route('emails.show', $email) }}" class="btn btn-info btn-sm">View</a>
+                        </div>
+                    </td>
                 </tr>
             @endforeach
         </tbody>

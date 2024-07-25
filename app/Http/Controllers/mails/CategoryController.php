@@ -15,34 +15,21 @@ class CategoryController extends Controller
         return view('categories.index', compact('categories'));
     }
 
-    public function create()
-    {
-        return view('categories.create');
-    }
-
     public function store(Request $request)
     {
-        $category = Category::create($request->only('name'));
-        $this->syncKeywords($category, $request->keywords);
-        return redirect()->route('categories.index')->with('success', 'Category created successfully');
-    }
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
 
-    public function edit(Category $category)
-    {
-        return view('categories.edit', compact('category'));
-    }
+        Category::create(['name' => $request->name]);
 
-    public function update(Request $request, Category $category)
-    {
-        $category->update($request->only('name'));
-        $this->syncKeywords($category, $request->keywords);
-        return redirect()->route('categories.index')->with('success', 'Category updated successfully');
+        return back()->with('success', 'Category created successfully');
     }
 
     public function destroy(Category $category)
     {
         $category->delete();
-        return redirect()->route('categories.index')->with('success', 'Category deleted successfully');
+        return back()->with('success', 'Category deleted successfully');
     }
 
     private function syncKeywords(Category $category, $keywords)
