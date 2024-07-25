@@ -6,7 +6,7 @@ This is a Laravel application that handles sending, receiving, viewing, and cate
 
 ![Database Design](ER.png)
 
-# Base URL
+## Base URL
 http://localhost:8000
 
 ## Features
