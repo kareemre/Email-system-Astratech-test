@@ -51,7 +51,7 @@ http://localhost:8080
 - Use the navigation bar to access the inbox, outbox, and email creation form.
 - Categorize emails directly from the inbox.
 - Reply to and forward emails from the email detail view.
-- Run the fetch command to fetch emails into the inbox:
+- Run the fetch command to fetch emails into the inbox based on IMAP:
 
     ```bash
     php artisan fetch:emails
